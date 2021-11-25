@@ -1,7 +1,10 @@
 package com.example.merchanttestapp;
 
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +16,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -41,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import company.tap.gosellapi.GoSellSDK;
+
 import company.tap.gosellapi.internal.api.callbacks.GoSellError;
 import company.tap.gosellapi.internal.api.models.Authorize;
 import company.tap.gosellapi.internal.api.models.Charge;
@@ -61,7 +66,12 @@ import company.tap.gosellapi.open.models.PaymentItem;
 import company.tap.gosellapi.open.models.Receipt;
 import company.tap.gosellapi.open.models.TapCurrency;
 import company.tap.gosellapi.open.models.Tax;
+import company.tap.gosellapi.open.models.TopUp;
+import company.tap.gosellapi.open.models.TopUpApplication;
+import company.tap.gosellapi.open.models.TopupPost;
 import company.tap.gosellapi.open.viewmodel.CustomerViewModel;
+import company.tap.sample.R;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SessionDelegate {
     Button ButtonStartSDK;
@@ -142,8 +152,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Required step.
      * Configure SDK with your Secret API key and App Bundle name registered with tap company.
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void configureApp() {
        GoSellSDK.init(this, "sk_test_kovrMB0mupFJXfNZWx6Etg5y", "company.tap.goSellSDKExample");  // to be replaced by merchant
+      //  GoSellSDK.init(this, "sk_test_hntUuCEY4gOovMlzqFxcGwV7", "goDataAccount.company.tap.goSellSDKWalletExamplee");  // to be replaced by merchant  // to be replaced by merchant
         GoSellSDK.setLocale("en");  // to be replaced by merchant
 
     }
@@ -209,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.setCustomer(getCustomer());    //** Required **
 
         // Set Total Amount. The Total amount will be recalculated according to provided Taxes and Shipping
-        sdkSession.setAmount(new BigDecimal(1));  //** Required **
+        sdkSession.setAmount(new BigDecimal(40));  //** Required **
 
         // Set Payment Items array list
         sdkSession.setPaymentItems(new ArrayList<>());// ** Optional ** you can pass empty array list
@@ -252,8 +264,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.setMerchantID(null); // ** Optional ** you can pass merchant id or null
         sdkSession.setDefaultCardHolderName("AHLAAM K"); // ** Optional ** you can pass defaultCardHolderName
         sdkSession.isUserAllowedToEnableCardHolderName(true);
+      //  sdkSession.setTopUp(getTopUp());
 
-       // sdkSession.setCardType(CardType.CREDIT); // ** Optional ** you can pass [CREDIT/DEBIT] id
+       // sdkSession.setCardType(CardType.ALL); // ** Optional ** you can pass [CREDIT/DEBIT] id
 
     }
 
@@ -274,22 +287,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          */
         startSDKWithUI();
 
-        //////////////////////////////////////////////////////    SDK Tokenization without UI //////////////////////
-        /**
-         * 2- Start using  SDK to tokenize your card without using SDK main activity (Without Tap CARD FORM)
-         * After the SDK finishes card tokenization, it will notify this activity with tokenization result in either
-         * cardTokenizedSuccessfully(@NonNull String token) or sdkError(@Nullable GoSellError goSellError)
-         */
-//          startSDKTokenizationWithoutUI();
-
-        //////////////////////////////////////////////////////    SDK Saving card without UI //////////////////////
-        /**
-         *  3- Start using  SDK to save your card without using SDK main activity ((Without Tap CARD FORM))
-         *  After the SDK finishes card tokenization, it will notify this activity with save card result in either
-         *  cardSaved(@NonNull Charge charge) or sdkError(@Nullable GoSellError goSellError)
-         *
-         */
-//         startSDKSavingCardWithoutUI();
     }
 
 
@@ -300,42 +297,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (sdkSession != null) {
             TransactionMode trx_mode = (settingsManager != null) ? settingsManager.getTransactionsMode("key_sdk_transaction_mode") : TransactionMode.PURCHASE;
             // set transaction mode [TransactionMode.PURCHASE - TransactionMode.AUTHORIZE_CAPTURE - TransactionMode.SAVE_CARD - TransactionMode.TOKENIZE_CARD ]
-            sdkSession.setTransactionMode(trx_mode);    //** Required **
+            sdkSession.setTransactionMode(TransactionMode.PURCHASE);    //** Required **
             // if you are not using tap button then start SDK using the following call
             //sdkSession.start(this);
         }
     }
 
 
-    /**
-     * Start using  SDK to tokenize your card without using SDK main activity
-     */
-
-    private void startSDKTokenizationWithoutUI() {
-        if (sdkSession != null) {
-            // set transaction mode [ TransactionMode.TOKENIZE_CARD_NO_UI ]
-            sdkSession.setTransactionMode(TransactionMode.TOKENIZE_CARD_NO_UI);    //** Required **
-            // pass card info to SDK
-            sdkSession.setCardInfo("5123450000000008", "05", "21", "100", "Haitham Elsheshtawy", null); //** Required **
-            // if you are not using tap button then start SDK using the following call
-            // sdkSession.start(this);
-        }
-    }
 
 
-    /**
-     * Start using  SDK to save your card without using SDK main activity
-     */
-    private void startSDKSavingCardWithoutUI() {
-        if (sdkSession != null) {
-            // set transaction mode [ TransactionMode.SAVE_CARD_NO_UI ]
-            sdkSession.setTransactionMode(TransactionMode.SAVE_CARD_NO_UI);    //** Required **
-            // pass card info to SDK
-            sdkSession.setCardInfo("5123450000000008", "05", "21", "100", "Haitham Elsheshtawy", null); //** Required **
-            // if you are not using tap button then start SDK using the following call
-//            sdkSession.start(this);
-        }
-    }
 
 
     /**
@@ -365,9 +335,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             TransactionMode trx_mode = sdkSession.getTransactionMode();
             if (trx_mode != null) {
 
-                if (TransactionMode.SAVE_CARD == trx_mode || TransactionMode.SAVE_CARD_NO_UI == trx_mode) {
+                if (TransactionMode.SAVE_CARD == trx_mode ) {
                     payButtonView.getPayButton().setText(getString(company.tap.gosellapi.R.string.save_card));
-                } else if (TransactionMode.TOKENIZE_CARD == trx_mode || TransactionMode.TOKENIZE_CARD_NO_UI == trx_mode) {
+                } else if (TransactionMode.TOKENIZE_CARD == trx_mode ) {
                     payButtonView.getPayButton().setText(getString(company.tap.gosellapi.R.string.tokenize));
                 } else {
                     payButtonView.getPayButton().setText(getString(company.tap.gosellapi.R.string.pay));
@@ -405,9 +375,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             System.out.println("Payment Succeeded : first six : " + charge.getCard().getFirstSix());
             System.out.println("Payment Succeeded : last four: " + charge.getCard().getLast4());
             System.out.println("Payment Succeeded : card object : " + charge.getCard().getObject());
-            System.out.println("Payment Succeeded : exp month : " + charge.getCard().getExpiry().getMonth());
-            System.out.println("Payment Succeeded : exp year : " + charge.getCard().getExpiry().getYear());
+          //  System.out.println("Payment Succeeded : exp month : " + charge.getCard().getExpiry().getMonth());
+           // System.out.println("Payment Succeeded : exp year : " + charge.getCard().getExpiry().getYear());
         }
+
+        System.out.println("##############################################################################");
+        if (charge.getTopup() != null) {
+            System.out.println("Payment Succeeded : topupWalletId : " + charge.getTopup().getWalletId());
+            System.out.println("Payment Succeeded : Id : " + charge.getTopup().getId());
+            System.out.println("Payment Succeeded : TopUpApp : " + charge.getTopup().getApplication().getAmount());
+        }
+
 
         System.out.println("##############################################################################");
         if (charge.getAcquirer() != null) {
@@ -503,6 +481,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println("Card Saved Succeeded : " + charge.getStatus());
         System.out.println("Card Saved Succeeded : " + charge.getDescription());
         System.out.println("Card Saved Succeeded : " + charge.getResponse().getMessage());
+        System.out.println("Card Saved Succeeded : " + ((SaveCard) charge).getCardIssuer().getName());
+        System.out.println("Card Saved Succeeded : " + ((SaveCard) charge).getCardIssuer().getId());
+        System.out.println("Card Saved Succeeded : " + ((SaveCard) charge).getCardIssuer().getCountry());
         saveCustomerRefInSession(charge);
         showDialog(charge.getId(), charge.getStatus().toString(), company.tap.gosellapi.R.drawable.ic_checkmark_normal);
     }
@@ -598,6 +579,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void userEnabledSaveCardOption(boolean saveCardEnabled) {
         System.out.println("userEnabledSaveCardOption :  " + saveCardEnabled);
+    }
+
+    @Override
+    public void cardTokenizedSuccessfully(@NonNull Token token, boolean saveCardEnabled) {
+        System.out.println("Card Tokenized Succeeded : ");
+        System.out.println("saveCardEnabled  : "+saveCardEnabled);
+        System.out.println("Token card : " + token.getCard().getFirstSix() + " **** " + token.getCard().getLastFour());
+        System.out.println("Token card : " + token.getCard().getFingerprint() + " **** " + token.getCard().getFunding());
+        System.out.println("Token card : " + token.getCard().getId() + " ****** " + token.getCard().getName());
+        System.out.println("Token card : " + token.getCard().getAddress() + " ****** " + token.getCard().getObject());
+        System.out.println("Token card : " + token.getCard().getExpirationMonth() + " ****** " + token.getCard().getExpirationYear());
+
+        showDialog(token.getId(), "Token", company.tap.gosellapi.R.drawable.ic_checkmark_normal);
     }
 
 
@@ -805,5 +799,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public int getItemCount() {
             return dataSet.size();
         }
+    }
+    //Set topup object
+    private TopUp getTopUp() {
+        TopUp topUp = new TopUp(
+                null,
+                "wal_xXTwK5211326gmgS16SV53834",
+                null,
+                null,
+                BigDecimal.valueOf(20),
+                "kwd",
+                null,null,null,new TopUpApplication((BigDecimal.valueOf(30)),"kwd"),null,new TopupPost("wwww.google.com"),null);
+        return topUp;
+
+
     }
 }

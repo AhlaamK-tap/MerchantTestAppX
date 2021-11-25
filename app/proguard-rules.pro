@@ -36,3 +36,4 @@
     -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
 -keep class company.tap.gosellapi.** { *; }
 -keep public class gotap.com.tapglkitandroid.** { *; }
+-keep class mobi.foo.benefitinapp.utils.BenefitInAppButton{*};
