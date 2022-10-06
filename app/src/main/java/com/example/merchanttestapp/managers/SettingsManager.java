@@ -178,8 +178,14 @@ public class SettingsManager {
         ArrayList<PaymentItem> items = new ArrayList<>();
 
         items.add(
-                new PaymentItem.PaymentItemBuilder("", new Quantity(Measurement.MASS,KILOGRAMS, BigDecimal.ONE), BigDecimal.ONE)
-                        .description("Description for test item #1")
+                new PaymentItem.PaymentItemBuilder("Coffe mug", new Quantity(Measurement.MASS,KILOGRAMS, BigDecimal.TEN), BigDecimal.TEN)
+                        .description("Householder")
+                        .discount(new AmountModificator(FIXED, BigDecimal.ZERO))
+                        .taxes(null)
+                        .build());
+        items.add(
+                new PaymentItem.PaymentItemBuilder("tea jar", new Quantity(Measurement.MASS,KILOGRAMS, BigDecimal.valueOf(2)), BigDecimal.TEN)
+                        .description("Biscuit jar")
                         .discount(new AmountModificator(FIXED, BigDecimal.ZERO))
                         .taxes(null)
                         .build());

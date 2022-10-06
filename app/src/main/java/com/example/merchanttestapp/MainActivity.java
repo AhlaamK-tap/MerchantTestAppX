@@ -154,8 +154,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void configureApp() {
-       GoSellSDK.init(this, "sk_test_kovrMB0mupFJXfNZWx6Etg5y", "company.tap.goSellSDKExample");  // to be replaced by merchant
-      //  GoSellSDK.init(this, "sk_test_hntUuCEY4gOovMlzqFxcGwV7", "goDataAccount.company.tap.goSellSDKWalletExamplee");  // to be replaced by merchant  // to be replaced by merchant
+        GoSellSDK.init(this, "sk_test_UCa45dOWjQpvTs9FzcqBfK1I", "company.tap.goSellSDKExample");  // to be replaced by merchant
         GoSellSDK.setLocale("en");  // to be replaced by merchant
 
     }
@@ -166,7 +165,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void configureSDKThemeObject() {
 
         ThemeObject.getInstance()
-                .setAppearanceMode(AppearanceMode.WINDOWED_MODE)
+                .setAppearanceMode(AppearanceMode.FULLSCREEN_MODE)
+                .setSdkLanguage("en")
 
                 .setHeaderFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
                 .setHeaderTextColor(getResources().getColor(R.color.black1))
@@ -194,8 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setPayButtonEnabledTitleColor(getResources().getColor(R.color.white))
                 .setPayButtonTextSize(14)
                 .setPayButtonLoaderVisible(true)
-                .setPayButtonSecurityIconVisible(true)
-        ;
+                .setPayButtonSecurityIconVisible(true);
 
     }
 
@@ -215,16 +214,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.instantiatePaymentDataSource();    //** Required **
 
         // set transaction currency associated to your account
-        sdkSession.setTransactionCurrency(new TapCurrency("KWD"));    //** Required **
+        sdkSession.setTransactionCurrency(new TapCurrency("usd"));    //** Required **
 
         // Using static CustomerBuilder method available inside TAP Customer Class you can populate TAP Customer object and pass it to SDK
         sdkSession.setCustomer(getCustomer());    //** Required **
 
         // Set Total Amount. The Total amount will be recalculated according to provided Taxes and Shipping
-        sdkSession.setAmount(new BigDecimal(40));  //** Required **
+        sdkSession.setAmount(BigDecimal.valueOf(120));  //** Required **
 
         // Set Payment Items array list
-        sdkSession.setPaymentItems(new ArrayList<>());// ** Optional ** you can pass empty array list
+        sdkSession.setPaymentItems(settingsManager.getPaymentItems());// ** Optional ** you can pass empty array list
 
         // Set Taxes array list
         sdkSession.setTaxes(new ArrayList<>());// ** Optional ** you can pass empty array list
@@ -262,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.setDestination(null); // ** Optional ** you can pass Destinations object or null
 
         sdkSession.setMerchantID(null); // ** Optional ** you can pass merchant id or null
-        sdkSession.setDefaultCardHolderName("AHLAAM K"); // ** Optional ** you can pass defaultCardHolderName
+     //   sdkSession.setDefaultCardHolderName("AHLAAM K"); // ** Optional ** you can pass defaultCardHolderName
         sdkSession.isUserAllowedToEnableCardHolderName(true);
       //  sdkSession.setTopUp(getTopUp());
 
@@ -592,6 +591,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println("Token card : " + token.getCard().getExpirationMonth() + " ****** " + token.getCard().getExpirationYear());
 
         showDialog(token.getId(), "Token", company.tap.gosellapi.R.drawable.ic_checkmark_normal);
+    }
+
+    @Override
+    public void asyncPaymentStarted(@NonNull Charge charge) {
+        System.out.println("asyncPaymentStarted Succeeded : charge status : " + charge.getStatus());
+        System.out.println("asyncPaymentStarted Succeeded : description : " + charge.getDescription());
+        System.out.println("asyncPaymentStarted Succeeded : message : " + charge.getResponse().getMessage());
+        System.out.println("##############################################################################");
+        if (charge.getCard() != null) {
+            System.out.println("Payment Succeeded : first six : " + charge.getCard().getFirstSix());
+            System.out.println("Payment Succeeded : last four: " + charge.getCard().getLast4());
+            System.out.println("Payment Succeeded : card object : " + charge.getCard().getObject());
+            //  System.out.println("Payment Succeeded : exp month : " + charge.getCard().getExpiry().getMonth());
+            // System.out.println("Payment Succeeded : exp year : " + charge.getCard().getExpiry().getYear());
+        }
     }
 
 
