@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void configureApp() {
         GoSellSDK.init(this, "sk_test_UCa45dOWjQpvTs9FzcqBfK1I", "company.tap.goSellSDKExample");  // to be replaced by merchant
+       // GoSellSDK.init(this, "sk_live_kzWSblBh6QaZm0oUtXg9TO4V", "com.like.likecard");  // to be replaced by merchant
         GoSellSDK.setLocale("en");  // to be replaced by merchant
 
     }
@@ -214,13 +215,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.instantiatePaymentDataSource();    //** Required **
 
         // set transaction currency associated to your account
-        sdkSession.setTransactionCurrency(new TapCurrency("usd"));    //** Required **
+        sdkSession.setTransactionCurrency(new TapCurrency("sar"));    //** Required **
 
         // Using static CustomerBuilder method available inside TAP Customer Class you can populate TAP Customer object and pass it to SDK
         sdkSession.setCustomer(getCustomer());    //** Required **
 
         // Set Total Amount. The Total amount will be recalculated according to provided Taxes and Shipping
-        sdkSession.setAmount(BigDecimal.valueOf(120));  //** Required **
+        sdkSession.setAmount(BigDecimal.valueOf(1));  //** Required **
 
         // Set Payment Items array list
         sdkSession.setPaymentItems(settingsManager.getPaymentItems());// ** Optional ** you can pass empty array list
@@ -606,6 +607,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             //  System.out.println("Payment Succeeded : exp month : " + charge.getCard().getExpiry().getMonth());
             // System.out.println("Payment Succeeded : exp year : " + charge.getCard().getExpiry().getYear());
         }
+    }
+
+    @Override
+    public void paymentInitiated(@Nullable Charge charge) {
+
     }
 
 
