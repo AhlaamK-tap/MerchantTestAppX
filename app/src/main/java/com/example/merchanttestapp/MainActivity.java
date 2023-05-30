@@ -154,8 +154,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void configureApp() {
-        GoSellSDK.init(this, "sk_test_UCa45dOWjQpvTs9FzcqBfK1I", "company.tap.goSellSDKExample");  // to be replaced by merchant
-       // GoSellSDK.init(this, "sk_live_kzWSblBh6QaZm0oUtXg9TO4V", "com.like.likecard");  // to be replaced by merchant
+     //   GoSellSDK.init(this, "sk_test_UCa45dOWjQpvTs9FzcqBfK1I", "company.tap.goSellSDKExample");  // to be replaced by merchant
+      //  GoSellSDK.init(this, "sk_live_kzWSblBh6QaZm0oUtXg9TO4V", "com.like.likecard");  // to be replaced by merchant
+      GoSellSDK.init(this, "sk_test_2obcyAW4lQCimBu7gXDOjx0e", "com.apptunix.dinein");  // to be replaced by merchant
         GoSellSDK.setLocale("en");  // to be replaced by merchant
 
     }
@@ -187,15 +188,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setSaveCardSwitchOnTrackTint(getResources().getColor(R.color.vibrant_green_pressed))
 
                 .setScanIconDrawable(getResources().getDrawable(R.drawable.btn_card_scanner_normal))
-
+                .setCardScannerIconVisible(false)
                 .setPayButtonResourceId(R.drawable.btn_pay_selector)  //btn_pay_merchant_selector
                 .setPayButtonFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
 
                 .setPayButtonDisabledTitleColor(getResources().getColor(R.color.white))
                 .setPayButtonEnabledTitleColor(getResources().getColor(R.color.white))
                 .setPayButtonTextSize(14)
+                .setPayButtonText("testing tokenize")
                 .setPayButtonLoaderVisible(true)
                 .setPayButtonSecurityIconVisible(true);
+
 
     }
 
@@ -215,13 +218,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.instantiatePaymentDataSource();    //** Required **
 
         // set transaction currency associated to your account
-        sdkSession.setTransactionCurrency(new TapCurrency("sar"));    //** Required **
+        sdkSession.setTransactionCurrency(new TapCurrency("BHD"));    //** Required **
 
         // Using static CustomerBuilder method available inside TAP Customer Class you can populate TAP Customer object and pass it to SDK
         sdkSession.setCustomer(getCustomer());    //** Required **
 
         // Set Total Amount. The Total amount will be recalculated according to provided Taxes and Shipping
-        sdkSession.setAmount(BigDecimal.valueOf(1));  //** Required **
+        sdkSession.setAmount(BigDecimal.valueOf(13));  //** Required **
 
         // Set Payment Items array list
         sdkSession.setPaymentItems(settingsManager.getPaymentItems());// ** Optional ** you can pass empty array list
@@ -297,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (sdkSession != null) {
             TransactionMode trx_mode = (settingsManager != null) ? settingsManager.getTransactionsMode("key_sdk_transaction_mode") : TransactionMode.PURCHASE;
             // set transaction mode [TransactionMode.PURCHASE - TransactionMode.AUTHORIZE_CAPTURE - TransactionMode.SAVE_CARD - TransactionMode.TOKENIZE_CARD ]
-            sdkSession.setTransactionMode(TransactionMode.PURCHASE);    //** Required **
+            sdkSession.setTransactionMode(TransactionMode.TOKENIZE_CARD);    //** Required **
             // if you are not using tap button then start SDK using the following call
             //sdkSession.start(this);
         }
