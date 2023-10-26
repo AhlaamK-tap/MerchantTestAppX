@@ -59,6 +59,7 @@ import company.tap.gosellapi.open.controllers.ThemeObject;
 import company.tap.gosellapi.open.delegate.SessionDelegate;
 import company.tap.gosellapi.open.enums.AppearanceMode;
 import company.tap.gosellapi.open.enums.CardType;
+import company.tap.gosellapi.open.enums.GPayWalletMode;
 import company.tap.gosellapi.open.enums.TransactionMode;
 import company.tap.gosellapi.open.models.CardsList;
 import company.tap.gosellapi.open.models.Customer;
@@ -276,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.setDestination(null); // ** Optional ** you can pass Destinations object or null
 
         sdkSession.setMerchantID(null); // ** Optional ** you can pass merchant id or null
+        sdkSession.setGooglePayWalletMode(GPayWalletMode.ENVIRONMENT_TEST);//** Required ** For setting GooglePAY
 
         //  sdkSession.setCardType(CardType.CREDIT); // ** Optional ** you can pass which cardType[CREDIT/DEBIT] you want.By default it loads all available cards for Merchant.
 
@@ -627,6 +629,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void paymentInitiated(@Nullable Charge charge) {
+
+    }
+
+    @Override
+    public void googlePayFailed(String error) {
 
     }
 
