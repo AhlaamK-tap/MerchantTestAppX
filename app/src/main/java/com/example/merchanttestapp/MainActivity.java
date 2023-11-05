@@ -60,6 +60,7 @@ import company.tap.gosellapi.open.delegate.SessionDelegate;
 import company.tap.gosellapi.open.enums.AppearanceMode;
 import company.tap.gosellapi.open.enums.CardType;
 import company.tap.gosellapi.open.enums.GPayWalletMode;
+import company.tap.gosellapi.open.enums.OperationMode;
 import company.tap.gosellapi.open.enums.TransactionMode;
 import company.tap.gosellapi.open.models.CardsList;
 import company.tap.gosellapi.open.models.Customer;
@@ -155,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void configureApp() {
-        GoSellSDK.init(this, "sk_test_UCa45dOWjQpvTs9FzcqBfK1I", "company.tap.goSellSDKExample");  // to be replaced by merchant
+        GoSellSDK.init(this, "sk_test_kovrMB0mupFJXfNZWx6Etg5y", "company.tap.goSellSDKExample");   // to be replaced by merchant
         GoSellSDK.setLocale("en");  // to be replaced by merchant
 
     }
@@ -232,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.setCustomer(getCustomer());    //** Required **
 
         // Set Total Amount. The Total amount will be recalculated according to provided Taxes and Shipping
-        sdkSession.setAmount(new BigDecimal(100));  //** Required **
+        sdkSession.setAmount(new BigDecimal(10));  //** Required **
 
         // Set Payment Items array list
         sdkSession.setPaymentItems(new ArrayList<>());// ** Optional ** you can pass empty array list
@@ -277,9 +278,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdkSession.setDestination(null); // ** Optional ** you can pass Destinations object or null
 
         sdkSession.setMerchantID(null); // ** Optional ** you can pass merchant id or null
-        sdkSession.setGooglePayWalletMode(GPayWalletMode.ENVIRONMENT_TEST);//** Required ** For setting GooglePAY
 
-        //  sdkSession.setCardType(CardType.CREDIT); // ** Optional ** you can pass which cardType[CREDIT/DEBIT] you want.By default it loads all available cards for Merchant.
+        sdkSession.setCardType(CardType.ALL); // ** Optional ** you can pass which cardType[CREDIT/DEBIT] you want.By default it loads all available cards for Merchant.
+
+        sdkSession.setOperationMode(OperationMode.SAND_BOX);
+
+        sdkSession.setGooglePayWalletMode(GPayWalletMode.ENVIRONMENT_TEST);//** Required ** For setting GooglePAY Environment
 
         // sdkSession.setTopUp(getTopUp()); // ** Optional ** you can pass TopUp object for Merchant.
 
