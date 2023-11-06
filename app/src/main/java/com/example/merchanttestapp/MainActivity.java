@@ -283,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         sdkSession.setOperationMode(OperationMode.SAND_BOX);
 
-        sdkSession.setGooglePayWalletMode(GPayWalletMode.ENVIRONMENT_TEST);//** Required ** For setting GooglePAY Environment
+      //  sdkSession.setGooglePayWalletMode(GPayWalletMode.ENVIRONMENT_TEST);//** Required ** For setting GooglePAY Environment
 
         // sdkSession.setTopUp(getTopUp()); // ** Optional ** you can pass TopUp object for Merchant.
 
