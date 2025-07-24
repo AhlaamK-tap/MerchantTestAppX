@@ -35,5 +35,61 @@
     -dontwarn org.conscrypt.**
     -keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
 -keep class company.tap.gosellapi.** { *; }
--keep public class gotap.com.tapglkitandroid.** { *; }
--keep class mobi.foo.benefitinapp.utils.BenefitInAppButton{*};
+-keep class gotap.com.tapglkitandroid.** { *; }
+
+
+-dontwarn okhttp2.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-dontwarn org.conscrypt.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+#-dontobfuscate
+-optimizations !code/allocation/variable
+-keep class company.tap.gosellapi.** { *; }
+# KEEP TapGLKit classes
+-keep class gotap.com.tapglkitandroid.** { *; }
+-keep class gotap.com.tapglkitandroid.gl.Views.TapLoadingView { *; }
+
+-dontwarn gotap.com.tapglkitandroid.**
+-keepclassmembers class gotap.com.tapglkitandroid.gl.Views.TapLoadingView {
+    public <init>(android.content.Context);
+    public <init>(android.content.Context, android.util.AttributeSet);
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}
+-keep class company.tap.tapcardvalidator_android.** { *; }
+-dontwarn company.tap.tapcardvalidator_android.**
+
+
+# GSON.
+-keepnames class com.google.gson.** {*;}
+-keepnames enum com.google.gson.** {*;}
+-keepnames interface com.google.gson.** {*;}
+-keep class com.google.gson.** { *; }
+-keepnames class org.** {*;}
+-keepnames enum org.** {*;}
+-keepnames interface org.** {*;}
+-keep class org.** { *; }
+-keepclassmembers enum * { *; }
+
+# Retrofit
+-keepattributes Signature
+-keepattributes RuntimeVisibleAnnotations
+-keep class retrofit2.** { *; }
+-keep interface retrofit2.** { *; }
+-keepclassmembers class * {
+    @retrofit2.http.* <methods>;
+}
+
+# OkHttp
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+
+# Gson
+-keep class com.google.gson.** { *; }
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
+-keepattributes Signature
+
+# Gson TypeToken
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken

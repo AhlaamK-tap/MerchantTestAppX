@@ -54,6 +54,15 @@
             tools:layout_editor_absoluteX="0dp" />
 
     </LinearLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+android:id="@+id/paybutn"
+        android:text="click"
+        app:layout_constraintBottom_toTopOf="@+id/textView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <company.tap.gosellapi.open.buttons.PayButtonView
         android:id="@+id/payButtonId"

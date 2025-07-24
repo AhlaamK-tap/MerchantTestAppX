@@ -1,6 +1,7 @@
 package com.example.merchanttestapp;
 
 
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -72,7 +73,7 @@ import company.tap.gosellapi.open.models.TopUp;
 import company.tap.gosellapi.open.models.TopUpApplication;
 import company.tap.gosellapi.open.models.TopupPost;
 import company.tap.gosellapi.open.viewmodel.CustomerViewModel;
-import company.tap.sample.R;
+
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SessionDelegate {
@@ -91,18 +92,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static ArrayList<SavedCard> data;
     static View.OnClickListener myOnClickListener;
     private static ArrayList<Integer> removedItems;
+    Button paybutn;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(com.example.merchanttestapp.R.layout.activity_main);
         settingsManager = SettingsManager.getInstance();
         settingsManager.setPref(this);
-        ButtonStartSDK = findViewById(R.id.button_startSDK);
+        ButtonStartSDK = findViewById(com.example.merchanttestapp.R.id.button_startSDK);
+       // paybutn = findViewById(com.example.merchanttestapp.R.id.button_startSDK);
         ButtonStartSDK.setOnClickListener(this);
-        layoutButton = findViewById(R.id.layoutButton);
-        // start tap goSellSDK
+        layoutButton = findViewById(com.example.merchanttestapp.R.id.layoutButton);
+        // start tap goSellSDK auto
         startSDK();
     }
 
@@ -171,30 +174,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setSdkLanguage("en")
 
                 .setHeaderFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
-                .setHeaderTextColor(getResources().getColor(R.color.black1))
+                .setHeaderTextColor(getResources().getColor(company.tap.gosellapi.R.color.black1))
                 .setHeaderTextSize(17)
-                .setHeaderBackgroundColor(getResources().getColor(R.color.french_gray_new))
+                .setHeaderBackgroundColor(getResources().getColor(company.tap.gosellapi.R.color.french_gray_new))
 
 
                 .setCardInputFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
-                .setCardInputTextColor(getResources().getColor(R.color.black))
-                .setCardInputInvalidTextColor(getResources().getColor(R.color.red))
-                .setCardInputPlaceholderTextColor(getResources().getColor(R.color.gray))
+                .setCardInputTextColor(getResources().getColor(company.tap.gosellapi.R.color.black))
+                .setCardInputInvalidTextColor(getResources().getColor(company.tap.gosellapi.R.color.red))
+                .setCardInputPlaceholderTextColor(getResources().getColor(company.tap.gosellapi.R.color.gray))
 
 
-                .setSaveCardSwitchOffThumbTint(getResources().getColor(R.color.french_gray_new))
-                .setSaveCardSwitchOnThumbTint(getResources().getColor(R.color.vibrant_green))
-                .setSaveCardSwitchOffTrackTint(getResources().getColor(R.color.french_gray))
-                .setSaveCardSwitchOnTrackTint(getResources().getColor(R.color.vibrant_green_pressed))
+                .setSaveCardSwitchOffThumbTint(getResources().getColor(company.tap.gosellapi.R.color.french_gray_new))
+                .setSaveCardSwitchOnThumbTint(getResources().getColor(company.tap.gosellapi.R.color.vibrant_green))
+                .setSaveCardSwitchOffTrackTint(getResources().getColor(company.tap.gosellapi.R.color.french_gray))
+                .setSaveCardSwitchOnTrackTint(getResources().getColor(company.tap.gosellapi.R.color.vibrant_green_pressed))
 
-                .setScanIconDrawable(getResources().getDrawable(R.drawable.btn_card_scanner_normal))
+                .setScanIconDrawable(getResources().getDrawable(company.tap.gosellapi.R.drawable.btn_card_scanner_normal))
                 .setCardScannerIconVisible(true) // **Optional**
 
-                .setPayButtonResourceId(R.drawable.btn_pay_selector)  //btn_pay_merchant_selector
+                .setPayButtonResourceId(company.tap.gosellapi.R.drawable.btn_pay_selector)  //btn_pay_merchant_selector
                 .setPayButtonFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
 
-                .setPayButtonDisabledTitleColor(getResources().getColor(R.color.white))
-                .setPayButtonEnabledTitleColor(getResources().getColor(R.color.white))
+                .setPayButtonDisabledTitleColor(getResources().getColor(company.tap.gosellapi.R.color.white))
+                .setPayButtonEnabledTitleColor(getResources().getColor(company.tap.gosellapi.R.color.white))
                 .setPayButtonTextSize(14)
                 .setPayButtonLoaderVisible(true)
                 .setPayButtonSecurityIconVisible(true)
@@ -204,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                 // setup dialog textcolor and textsize
-                .setDialogTextColor(getResources().getColor(R.color.black1))     // **Optional**
+                .setDialogTextColor(getResources().getColor(company.tap.gosellapi.R.color.black1))     // **Optional**
                 .setDialogTextSize(17)                // **Optional**
 
         ;
@@ -321,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // set transaction mode [TransactionMode.PURCHASE - TransactionMode.AUTHORIZE_CAPTURE - TransactionMode.SAVE_CARD - TransactionMode.TOKENIZE_CARD ]
             sdkSession.setTransactionMode(TransactionMode.PURCHASE);    //** Required **
             // if you are not using tap button then start SDK using the following call
-            //sdkSession.start(this);
+           // sdkSession.start(this);
         }
     }
 
@@ -337,13 +340,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         payButtonView = findViewById(R.id.payButtonId);
 
-        if(ThemeObject.getInstance().getPayButtonFont()!=null)
-        payButtonView.setupFontTypeFace(ThemeObject.getInstance().getPayButtonFont());
-        if(ThemeObject.getInstance().getPayButtonEnabledTitleColor()!=0 && ThemeObject.getInstance().getPayButtonDisabledTitleColor()!=0 )
+        if (ThemeObject.getInstance().getPayButtonFont() != null)
+            payButtonView.setupFontTypeFace(ThemeObject.getInstance().getPayButtonFont());
+        if (ThemeObject.getInstance().getPayButtonEnabledTitleColor() != 0 && ThemeObject.getInstance().getPayButtonDisabledTitleColor() != 0)
             payButtonView.setupTextColor(ThemeObject.getInstance().getPayButtonEnabledTitleColor(),
-                ThemeObject.getInstance().getPayButtonDisabledTitleColor());
+                    ThemeObject.getInstance().getPayButtonDisabledTitleColor());
 //
-        if(ThemeObject.getInstance().getPayButtonTextSize()!=0 )
+        if (ThemeObject.getInstance().getPayButtonTextSize() != 0)
 
             payButtonView.getPayButton().setTextSize(ThemeObject.getInstance().getPayButtonTextSize());
 //
@@ -710,7 +713,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                 popupWindow.showAtLocation(layout, Gravity.TOP, 0, 50);
-                popupWindow.getContentView().startAnimation(AnimationUtils.loadAnimation(this, R.anim.popup_show));
+                popupWindow.getContentView().startAnimation(AnimationUtils.loadAnimation(this, company.tap.gosellapi.R.anim.popup_show));
 
                 setupTimer(popupWindow);
             }
@@ -781,9 +784,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if(v.getId()==R.id.button_startSDK){
-            payButtonView.setVisibility(View.VISIBLE);
+           // payButtonView.setVisibility(View.VISIBLE);
             ButtonStartSDK.setVisibility(View.GONE);
             layoutButton.setVisibility(View.VISIBLE);
+            startSDK();
         }
 
     }
