@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,9 +43,18 @@ import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import company.tap.google.pay.open.DataConfiguration;
+import company.tap.google.pay.open.GooglePayButton;
+import company.tap.google.pay.open.SDKDelegate;
+import company.tap.google.pay.open.enums.AllowedMethods;
+import company.tap.google.pay.open.enums.GooglePayButtonType;
+import company.tap.google.pay.open.enums.SDKMode;
 import company.tap.gosellapi.GoSellSDK;
 
 import company.tap.gosellapi.internal.api.callbacks.GoSellError;
@@ -73,10 +83,14 @@ import company.tap.gosellapi.open.models.TopUp;
 import company.tap.gosellapi.open.models.TopUpApplication;
 import company.tap.gosellapi.open.models.TopupPost;
 import company.tap.gosellapi.open.viewmodel.CustomerViewModel;
+import company.tap.tapbenefitpay.open.BenefitPayDataConfiguration;
+import company.tap.tapbenefitpay.open.TapBenefitPayStatusDelegate;
+import company.tap.tapbenefitpay.open.web_wrapper.BeneiftPayConfiguration;
+import company.tap.tapcardformkit.open.TapCardStatusDelegate;
+import company.tap.tapcardformkit.open.web_wrapper.TapCardConfiguration;
 
 
-
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SessionDelegate {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SessionDelegate, SDKDelegate , TapBenefitPayStatusDelegate {
     Button ButtonStartSDK;
     private final int SDK_REQUEST_CODE = 1001;
     private SDKSession sdkSession;
@@ -93,21 +107,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     static View.OnClickListener myOnClickListener;
     private static ArrayList<Integer> removedItems;
     Button paybutn;
-
+    DataConfiguration dataConfiguration = DataConfiguration.INSTANCE;
+    GooglePayButton googlePayButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.example.merchanttestapp.R.layout.activity_main);
+
         settingsManager = SettingsManager.getInstance();
         settingsManager.setPref(this);
         ButtonStartSDK = findViewById(com.example.merchanttestapp.R.id.button_startSDK);
-       // paybutn = findViewById(com.example.merchanttestapp.R.id.button_startSDK);
+
+        googlePayButton = findViewById(R.id.googlePayView); // paybutn = findViewById(com.example.merchanttestapp.R.id.button_startSDK);
+        googlePayButton.setGooglePayButtonType(GooglePayButtonType.NORMAL_GOOGLE_PAY);
+
         ButtonStartSDK.setOnClickListener(this);
+
+        googlePayButton.buttonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dataConfiguration.getGooglePayToken(MainActivity.this,googlePayButton);
+            }
+        });
         layoutButton = findViewById(com.example.merchanttestapp.R.id.layoutButton);
         // start tap goSellSDK auto
         startSDK();
+        initializeSDK();
+        configureSDKData();
+        configureSdk();
+        getDataFromHashMap();
     }
+
+    private void initializeSDK() {
+        if (settingsManager != null) {
+            String keyTestName = settingsManager.getString("key_test_name", "sk_test_kovrMB0mupFJXfNZWx6Etg5y");
+            String packageName = settingsManager.getString("key_package_name", "company.tap.goSellSDKExample");
+
+            if (keyTestName != null && packageName != null) {
+                dataConfiguration.initSDK(MainActivity.this, keyTestName, packageName);
+            }
+        }
+    }
+
+
+
+    private void configureSDKData() {
+        // Pass your activity as a session delegate to listen to SDK internal payment process
+        dataConfiguration.addSDKDelegate(this); // Required
+
+        // Set SDK Environment Mode (assuming an enum value)
+        dataConfiguration.setEnvironmentMode(SDKMode.ENVIRONMENT_TEST); // Required SDK MODE
+
+        // Set Gateway ID
+        dataConfiguration.setGatewayId("tappayments"); // Required GATEWAY ID
+
+        // Set Gateway Merchant ID
+        dataConfiguration.setGatewayMerchantID("1124340"); // Required GATEWAY Merchant ID
+
+        // Set Amount
+        dataConfiguration.setAmount(new BigDecimal("23.7")); // Required Amount
+
+        // Set Allowed Card Auth Methods
+        List<String> allowedAuthMethods = Arrays.asList("PAN_ONLY", "CRYPTOGRAM_3DS"); // Example values
+        // For a single allowed method
+        dataConfiguration.setAllowedCardAuthMethods(AllowedMethods.ALL); // or PAN_ONLY, or CRYPTOGRAM_3DS
+        // Required Auth Methods
+
+        // Set Currency Code
+        dataConfiguration.setTransactionCurrency("USD"); // Required Currency
+
+        // Set Country Code
+        dataConfiguration.setCountryCode("US"); // Required Country
+
+        // Set Allowed Card Networks
+        List<String> allowedNetworks = Arrays.asList("AMEX", "MASTERCARD", "VISA"); // Example networks
+        dataConfiguration.setAllowedCardNetworks(allowedNetworks); // Required Payment Networks
+    }
+
 
     @Override
     protected void onResume() {
@@ -157,10 +234,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Required step.
      * Configure SDK with your Secret API key and App Bundle name registered with tap company.
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
     private void configureApp() {
         GoSellSDK.init(this, "sk_test_kovrMB0mupFJXfNZWx6Etg5y", "company.tap.goSellSDKExample");   // to be replaced by merchant
-        GoSellSDK.setLocale("en");  // to be replaced by merchant
+       // GoSellSDK.setLocale("ar");  // to be replaced by merchant
 
     }
 
@@ -171,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ThemeObject.getInstance()
                 .setAppearanceMode(AppearanceMode.WINDOWED_MODE)
-                .setSdkLanguage("en")
+                .setSdkLanguage("ar")
 
                 .setHeaderFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
                 .setHeaderTextColor(getResources().getColor(company.tap.gosellapi.R.color.black1))
@@ -191,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setSaveCardSwitchOnTrackTint(getResources().getColor(company.tap.gosellapi.R.color.vibrant_green_pressed))
 
                 .setScanIconDrawable(getResources().getDrawable(company.tap.gosellapi.R.drawable.btn_card_scanner_normal))
-                .setCardScannerIconVisible(true) // **Optional**
+           //     .setCardScannerIconVisible(true) // **Optional**
 
                 .setPayButtonResourceId(company.tap.gosellapi.R.drawable.btn_pay_selector)  //btn_pay_merchant_selector
                 .setPayButtonFont(Typeface.createFromAsset(getAssets(), "fonts/roboto_light.ttf"))
@@ -202,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setPayButtonLoaderVisible(true)
                 .setPayButtonSecurityIconVisible(true)
 
-                .setPayButtonText("PAY") // **Optional**
+                .setPayButtonText(getResources().getString(company.tap.gosellapi.R.string.pay)) // **Optional**
 
 
 
@@ -322,7 +399,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (sdkSession != null) {
             TransactionMode trx_mode = (settingsManager != null) ? settingsManager.getTransactionsMode("key_sdk_transaction_mode") : TransactionMode.PURCHASE;
             // set transaction mode [TransactionMode.PURCHASE - TransactionMode.AUTHORIZE_CAPTURE - TransactionMode.SAVE_CARD - TransactionMode.TOKENIZE_CARD ]
-            sdkSession.setTransactionMode(TransactionMode.PURCHASE);    //** Required **
+            sdkSession.setTransactionMode(TransactionMode.TOKENIZE_CARD);    //** Required **
             // if you are not using tap button then start SDK using the following call
            // sdkSession.start(this);
         }
@@ -796,6 +873,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
        // sdkSession.cancelSession(this);
     }
 
+    @Override
+    public void onFailed(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onGooglePayToken(@NonNull String s) {
+        showDialog("onGooglePayToken",s, company.tap.gosellapi.R.drawable.ic_checkmark_normal);
+
+    }
+
+    @Override
+    public void onTapToken(@NonNull company.tap.google.pay.internal.api.responses.Token token) {
+        showDialog("onGooglePayToken",token.getId(), company.tap.gosellapi.R.drawable.ic_checkmark_normal);
+
+    }
+
+    @Override
+    public void onBenefitPaySuccess(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onBenefitPayReady() {
+
+    }
+
+    @Override
+    public void onBenefitPayClick() {
+
+    }
+
+    @Override
+    public void onBenefitPayOrderCreated(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onBenefitPayChargeCreated(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onBenefitPayError(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onBenefitPayCancel() {
+
+    }
+
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHolder> {
 
@@ -865,4 +994,366 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
+    private void configureSdk() {
+
+        // ======================
+        // Operator
+        // ======================
+        HashMap<String, Object> operator = new HashMap<>();
+        operator.put("publicKey", "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7");   // hardcoded
+        operator.put("hashString", ""); // hardcoded
+        operator.put("scopeKey", "charge");  // hardcoded
+
+        Log.e("orderData", "publicKey=pk_test_123456 \nhash=hash_test_123456");
+
+        // ======================
+        // Metadata
+        // ======================
+        HashMap<String, Object> metadata = new HashMap<>();
+        metadata.put("id", "");
+
+        // ======================
+        // Order
+        // ======================
+        String orderId = "ORD_001";
+        String orderDescription = "Sample order description";
+        String orderAmount = "1";
+        String orderReference = "REF_123456";
+        String selectedCurrency = "BHD";
+
+        HashMap<String, Object> order = new HashMap<>();
+        order.put("id", orderId);
+        order.put("amount", orderAmount);
+        order.put("currency", selectedCurrency);
+        order.put("description", orderDescription);
+        order.put("reference", orderReference);
+        order.put("metadata", metadata);
+
+        Log.e("orderData", "id=" + orderId +
+                "\ndesc=" + orderDescription +
+                "\namount=" + orderAmount +
+                "\nref=" + orderReference +
+                "\ncurrency=" + selectedCurrency);
+
+        // ======================
+        // Merchant
+        // ======================
+        HashMap<String, Object> merchant = new HashMap<>();
+        merchant.put("id", "");
+
+        // ======================
+        // Invoice
+        // ======================
+        HashMap<String, Object> invoice = new HashMap<>();
+        invoice.put("id", "");
+
+        // ======================
+        // Phone
+        // ======================
+        HashMap<String, Object> phone = new HashMap<>();
+        phone.put("countryCode", "965");
+        phone.put("number", "6617090");
+
+        // ======================
+        // Contact
+        // ======================
+        HashMap<String, Object> contact = new HashMap<>();
+        contact.put("email", "email@emailc.com");
+        contact.put("phone", phone);
+
+        // ======================
+        // Interface
+        // ======================
+        String selectedLanguage = "en";
+        String selectedCardEdge = "circular";
+        String paymentMethod = "benefitpay";
+
+        Log.e("interfaceData", "language=" + selectedLanguage + " cardedge=" + selectedCardEdge);
+
+        HashMap<String, Object> interfacee = new HashMap<>();
+        interfacee.put("locale", selectedLanguage);
+        interfacee.put("edges", selectedCardEdge);
+
+        // ======================
+        // Post
+        // ======================
+        HashMap<String, Object> post = new HashMap<>();
+        post.put("url", "");
+
+        // ======================
+        // Transaction
+        // ======================
+        HashMap<String, Object> transaction = new HashMap<>();
+        transaction.put("amount", orderAmount);
+        transaction.put("currency", selectedCurrency);
+        transaction.put("autoDismiss", false); // hardcoded false
+
+        Log.e("transaction", "amount=" + orderAmount + " currency=" + selectedCurrency);
+
+        // ======================
+        // Reference
+        // ======================
+        HashMap<String, Object> reference = new HashMap<>();
+        reference.put("transaction", orderReference);
+        reference.put("order", orderDescription);
+
+        // ======================
+        // Name
+        // ======================
+        HashMap<String, Object> name = new HashMap<>();
+        name.put("lang", selectedLanguage);
+        name.put("first", "TAP");
+        name.put("middle", "middle");
+        name.put("last", "PAYMENTS");
+
+        // ======================
+        // Customer
+        // ======================
+        HashMap<String, Object> customer = new HashMap<>();
+        customer.put("id", "");
+        customer.put("contact", contact);
+        customer.put("names", java.util.Collections.singletonList(name));
+
+        // ======================
+        // Configuration
+        // ======================
+        LinkedHashMap<String, Object> configuration = new LinkedHashMap<>();
+        configuration.put("paymentMethod", paymentMethod);
+        configuration.put("merchant", merchant);
+        configuration.put("scope", "scope_test_123456");
+        configuration.put("redirect", "tapredirectionwebsdk://");
+        configuration.put("customer", customer);
+        configuration.put("interface", interfacee);
+        configuration.put("reference", reference);
+        configuration.put("metadata", "");
+        configuration.put("post", post);
+        configuration.put("transaction", transaction);
+        configuration.put("operator", operator);
+
+        // ======================
+        // Call SDK Configurator
+        // ======================
+        BeneiftPayConfiguration.Companion.configureWithTapBenfitPayDictionaryConfiguration(
+                this,
+                findViewById(R.id.benfit_pay),
+                configuration,
+                this
+        );
+    }
+
+    private void getDataFromHashMap() {
+
+        // Hardcoded values
+        String selectedLanguage = "en";
+        String selectedCurrency = "KWD";
+        String selectedTheme = "light";
+        String custId = "";
+        String cardNameKey = "John Doe";
+        String cardNumber = "4111111111111111";
+        String cardExpiry = "12/30";
+        String selectedCardEdge = "rounded";
+        boolean showCardBrands = true;
+        boolean showHideScanner = true;
+        boolean showHideNFC = true;
+        String amount = "1";
+        ArrayList<String> cardBrands = new ArrayList<>(Arrays.asList("Visa", "MasterCard"));
+        ArrayList<String> cardFundSources = new ArrayList<>(Arrays.asList("Credit", "Debit"));
+        String scopeType = "charge";
+        boolean powerdBy = true;
+        boolean showLoadingState = true;
+        String sandboxKey = "pk_test_YhUjg9PNT8oDlKJ1aE2fMRz7";
+        String merchantIdKey = "1124340";
+        String selectedCardDirection = "horizontal";
+        String ordrId = "order_001";
+        String orderDescription = "Test Order";
+        String transactionRefrence = "txn_001";
+        String postUrl = "https://example.com/post";
+        String invoiceId = "invoice_001";
+        String purpose = "purchase";
+        boolean saveCard = true;
+        boolean autoSaveCard = true;
+        String redirectURL = "https://example.com/redirect";
+        String selectedColorStyle = "blue";
+        boolean cardHolder = true;
+        boolean cvv = true;
+
+        // Operator
+        HashMap<String, Object> operator = new HashMap<>();
+        operator.put("publicKey", sandboxKey);
+
+        // Scope
+        HashMap<String, Object> scope = new HashMap<>();
+        scope.put("scope", scopeType);
+
+        // Merchant
+        HashMap<String, Object> merchant = new HashMap<>();
+        merchant.put("id", merchantIdKey);
+
+        // Invoice
+        HashMap<String, Object> invoice = new HashMap<>();
+        invoice.put("id", invoiceId);
+
+        // Post
+        HashMap<String, Object> post = new HashMap<>();
+        post.put("url", postUrl);
+
+        // Redirect
+        HashMap<String, Object> redirect = new HashMap<>();
+        redirect.put("url", redirectURL);
+
+        // Metadata
+        HashMap<String, Object> metadata = new HashMap<>();
+        metadata.put("id", "");
+
+        // Contract
+        HashMap<String, Object> contract = new HashMap<>();
+        contract.put("id", "");
+
+        // PaymentAgreement
+        HashMap<String, Object> paymentAgreement = new HashMap<>();
+        paymentAgreement.put("id", "");
+        paymentAgreement.put("contract", contract);
+
+        // Transaction
+        HashMap<String, Object> transaction = new HashMap<>();
+        transaction.put("paymentAgreement", paymentAgreement);
+        transaction.put("metadata", metadata);
+
+        // Phone
+        HashMap<String, Object> phone = new HashMap<>();
+        phone.put("countryCode", "+20");
+        phone.put("number", "011");
+
+        // Contact
+        HashMap<String, Object> contact = new HashMap<>();
+        contact.put("email", "test@gmail.com");
+        contact.put("phone", phone);
+
+        // Name
+        HashMap<String, Object> name = new HashMap<>();
+        name.put("lang", selectedLanguage);
+        name.put("first", "first");
+        name.put("middle", "middle");
+        name.put("last", "last");
+
+        // Customer
+        HashMap<String, Object> customer = new HashMap<>();
+        customer.put("nameOnCard", cardNameKey);
+        customer.put("editable", cardHolder);
+        customer.put("contact", contact);
+        customer.put("name", Collections.singletonList(name));
+
+        // Acceptance
+        HashMap<String, Object> acceptance = new HashMap<>();
+        acceptance.put("supportedSchemes", cardBrands);
+        acceptance.put("supportedFundSource", cardFundSources);
+        acceptance.put("supportedPaymentAuthentications", Collections.singletonList("3DS"));
+
+        // Field visibility
+        HashMap<String, Object> card = new HashMap<>();
+        card.put("cvv", cvv);
+        card.put("cardHolder", cardHolder);
+        HashMap<String, Object> fieldVisibility = new HashMap<>();
+        fieldVisibility.put("card", card);
+
+        // Customer cards
+        HashMap<String, Object> customerCards = new HashMap<>();
+        customerCards.put("saveCard", saveCard);
+        customerCards.put("autoSaveCard", autoSaveCard);
+
+        // Alternative card input
+        HashMap<String, Object> alternativeCardInput = new HashMap<>();
+        alternativeCardInput.put("cardScanner", showHideScanner);
+        alternativeCardInput.put("cardNFC", showHideNFC);
+
+        // Features
+        HashMap<String, Object> features = new HashMap<>();
+        features.put("acceptanceBadge", showCardBrands);
+        features.put("customerCards", customerCards);
+        features.put("alternativeCardInputs", alternativeCardInput);
+
+        // Order
+        HashMap<String, Object> order = new HashMap<>();
+        order.put("id", ordrId);
+        order.put("amount", amount);
+        order.put("currency", selectedCurrency);
+        order.put("description", orderDescription);
+        order.put("reference", transactionRefrence);
+
+        // Interface
+        HashMap<String, Object> interfacee = new HashMap<>();
+        interfacee.put("locale", selectedLanguage);
+        interfacee.put("theme", selectedTheme);
+        interfacee.put("edges", selectedCardEdge);
+        interfacee.put("cardDirection", selectedCardDirection);
+        interfacee.put("powered", powerdBy);
+        interfacee.put("colorStyle", selectedColorStyle);
+        interfacee.put("loader", showLoadingState);
+
+        // Final configuration
+        LinkedHashMap<String, Object> configuration = new LinkedHashMap<>();
+        configuration.put("operator", operator);
+        configuration.put("scope", scopeType);
+        configuration.put("order", order);
+        configuration.put("customer", customer);
+        configuration.put("purpose", purpose);
+        configuration.put("transaction", transaction);
+        configuration.put("invoice", invoice);
+        configuration.put("merchant", merchant);
+        configuration.put("features", features);
+        configuration.put("acceptance", acceptance);
+        configuration.put("fieldVisibility", fieldVisibility);
+        configuration.put("interface", interfacee);
+        configuration.put("redirect", redirect);
+        configuration.put("post", post);
+
+        System.out.println("configuration here: " + configuration);
+
+        // Call TapCardConfiguration (example)
+        TapCardConfiguration.Companion.configureWithTapCardDictionaryConfiguration(
+                this,
+                findViewById(R.id.tapCardForm),
+                configuration,
+                new TapCardStatusDelegate() {
+                    @Override
+                    public void onHeightChange(@NonNull String s) {
+
+                    }
+
+                    @Override
+                    public void onCardFocus() {
+
+                    }
+
+                    @Override
+                    public void onCardSuccess(String data) {
+                        Toast.makeText(MainActivity.this, "onSuccess " + data, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onCardReady() {
+                       // findViewById(R.id.tokenizeBtn).setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onBindIdentification(String data) { }
+
+                    @Override
+                    public void onValidInput(String isValid) { }
+
+                    @Override
+                    public void onChangeSaveCard(boolean enabled) { }
+
+                    @Override
+                    public void onCardError(String error) {
+                        Toast.makeText(MainActivity.this, "onError " + error, Toast.LENGTH_SHORT).show();
+                    }
+                },
+                cardNumber,
+                cardExpiry
+        );
+    }
+
+
+
 }
