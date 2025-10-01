@@ -6,6 +6,7 @@ buildscript {
         jcenter()
         ext.kotlin_version = "1.9.0" // Update to latest stable
         mavenCentral()
+        mavenLocal()
         
     }
     dependencies {

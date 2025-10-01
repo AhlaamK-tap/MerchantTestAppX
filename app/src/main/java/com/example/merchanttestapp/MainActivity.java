@@ -40,6 +40,9 @@ import com.example.merchanttestapp.managers.SettingsManager;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.math.BigDecimal;
 
 import java.util.ArrayList;
@@ -88,9 +91,11 @@ import company.tap.tapbenefitpay.open.TapBenefitPayStatusDelegate;
 import company.tap.tapbenefitpay.open.web_wrapper.BeneiftPayConfiguration;
 import company.tap.tapcardformkit.open.TapCardStatusDelegate;
 import company.tap.tapcardformkit.open.web_wrapper.TapCardConfiguration;
+import company.tap.tapcheckout_android.CheckoutConfiguration;
+import company.tap.tapcheckout_android.TapCheckoutStatusDelegate;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SessionDelegate, SDKDelegate , TapBenefitPayStatusDelegate {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, SessionDelegate, SDKDelegate , TapBenefitPayStatusDelegate, TapCheckoutStatusDelegate {
     Button ButtonStartSDK;
     private final int SDK_REQUEST_CODE = 1001;
     private SDKSession sdkSession;
@@ -137,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         configureSDKData();
         configureSdk();
         getDataFromHashMap();
+        configureCheckoutSdk(null);
     }
 
     private void initializeSDK() {
@@ -925,6 +931,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    @Override
+    public void onCheckoutSuccess(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onCheckoutReady() {
+
+    }
+
+    @Override
+    public void onCheckoutClick() {
+
+    }
+
+    @Override
+    public void onCheckoutOrderCreated(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onCheckoutChargeCreated(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onCheckoutError(@NonNull String s) {
+
+    }
+
+    @Override
+    public void onCheckoutcancel() {
+
+    }
+
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.MyViewHolder> {
 
@@ -1073,6 +1114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         HashMap<String, Object> interfacee = new HashMap<>();
         interfacee.put("locale", selectedLanguage);
         interfacee.put("edges", selectedCardEdge);
+        interfacee.put("theme", "dynamic");
 
         // ======================
         // Post
@@ -1351,9 +1393,147 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 },
                 cardNumber,
                 cardExpiry
+
         );
     }
 
+    public void configureCheckoutSdk(String intentId) {
+        try {
+            // Hardcoded public key
+            String publicKey = "pk_test_ohzQrUWRnTkCLD1cqMeudyjX";
+
+            // Intent object
+            HashMap<String, Object> intentObj = new HashMap<>();
+            if (intentId != null) {
+                intentObj.put("intent", intentId);
+            }
+
+            // Main configuration
+            LinkedHashMap<String, Object> configuration = new LinkedHashMap<>();
+            configuration.put("open", true);
+            configuration.put("hashString", "");
+            configuration.put("checkoutMode", "page");
+            configuration.put("language", "en");
+            configuration.put("themeMode", "dark");
+
+            // Supported payment methods
+            JSONArray jsonArrayPaymentMethod = new JSONArray();
+            jsonArrayPaymentMethod.put("CARD");
+           // jsonArrayPaymentMethod.put("WEB");
+           // jsonArrayPaymentMethod.put("APPLE_PAY");
+            configuration.put("supportedPaymentMethods", "ALL");
+
+            configuration.put("paymentType", "ALL");
+            configuration.put("selectedCurrency", "KWD");
+            configuration.put("supportedCurrencies", "ALL");
+
+            // Gateway
+            JSONObject gateway = new JSONObject();
+            gateway.put("publicKey", "pk_test_gznOhsfdL0QMV8AW7tSN2wKP");
+            gateway.put("merchantId", ""); // Hardcoded empty
+            configuration.put("gateway", gateway);
+
+            // Customer
+            JSONObject customer = new JSONObject();
+            customer.put("firstName", "First Android");
+            customer.put("lastName", "Test");
+            customer.put("email", "example@gmail.com");
+
+            JSONObject phone = new JSONObject();
+            phone.put("countryCode", "965");
+            phone.put("number", "55567890");
+            customer.put("phone", phone);
+
+            configuration.put("customer", customer);
+
+            // Transaction
+            JSONObject transaction = new JSONObject();
+            transaction.put("mode", "charge");
+
+            JSONObject charge = new JSONObject();
+            charge.put("saveCard", true);
+
+            JSONObject auto = new JSONObject();
+            auto.put("type", "VOID");
+            auto.put("time", 100);
+            charge.put("auto", auto);
+
+            JSONObject redirect = new JSONObject();
+            redirect.put("url", "https://demo.staging.tap.company/v2/sdk/checkout");
+            charge.put("redirect", redirect);
+
+            charge.put("threeDSecure", true);
+
+            JSONObject subscription = new JSONObject();
+            subscription.put("type", "SCHEDULED");
+            subscription.put("amount_variability", "FIXED");
+            subscription.put("txn_count", 0);
+            charge.put("subscription", subscription);
+
+            JSONObject airline = new JSONObject();
+            JSONObject reference = new JSONObject();
+            reference.put("booking", "");
+            airline.put("reference", reference);
+            charge.put("airline", airline);
+
+            transaction.put("charge", charge);
+            configuration.put("transaction", transaction);
+
+            // Amount
+            configuration.put("amount", "1");
+
+            // Order
+            JSONObject order = new JSONObject();
+            order.put("id", "");
+            order.put("currency", "KWD");
+            order.put("amount", "1");
+
+            JSONArray items = new JSONArray();
+            JSONObject item = new JSONObject();
+            item.put("amount", "1");
+            item.put("currency", "KWD");
+            item.put("name", "Item Title 1");
+            item.put("quantity", 1);
+            item.put("description", "item description 1");
+            items.put(item);
+
+            order.put("items", items);
+            configuration.put("order", order);
+
+            // Card options
+            JSONObject cardOptions = new JSONObject();
+            cardOptions.put("showBrands", true);
+            cardOptions.put("showLoadingState", false);
+            cardOptions.put("collectHolderName", true);
+            cardOptions.put("preLoadCardName", "");
+            cardOptions.put("cardNameEditable", true);
+            cardOptions.put("cardFundingSource", "all");
+            cardOptions.put("saveCardOption", "all");
+            cardOptions.put("forceLtr", false);
+
+            JSONObject alternativeCardInputs = new JSONObject();
+            alternativeCardInputs.put("cardScanner", true);
+            alternativeCardInputs.put("cardNFC", true);
+            cardOptions.put("alternativeCardInputs", alternativeCardInputs);
+
+            configuration.put("cardOptions", cardOptions);
+            configuration.put("isApplePayAvailableOnClient", true);
+
+            // Call SDK if no intentId
+            if (intentId == null) {
+                CheckoutConfiguration.Companion.configureWithTapCheckoutDictionary(
+                        this,
+                        publicKey,
+                        findViewById(R.id.checkout_pay),
+                        configuration,
+                        this
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

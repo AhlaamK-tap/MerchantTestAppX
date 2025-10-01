@@ -114,6 +114,12 @@ android:id="@+id/paybutn"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/benfit_pay"
         />
-
+    <company.tap.tapcheckout_android.TapCheckout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:id="@+id/checkout_pay"
+        app:layout_constraintBottom_toTopOf="@+id/stopsse"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
