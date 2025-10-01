@@ -52,7 +52,7 @@ dependencies {
        // exclude group: 'com.squareup.okhttp3', module: 'logging-interceptor'
    // }
     implementation 'com.github.Tap-Payments:TapGooglePayKit:1.0.2.13'
-   implementation 'com.github.Tap-Payments:Checkout-Android:1.0.5.3'
+   implementation 'com.github.Tap-Payments:Checkout-Android:1.0.6'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:2.2.0" // <-- MUST be api, not implementation
 
 

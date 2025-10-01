@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initializeSDK();
         configureSDKData();
         configureSdk();
-        getDataFromHashMap();
+      //  getDataFromHashMap();
         configureCheckoutSdk(null);
     }
 
